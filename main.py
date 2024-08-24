@@ -58,7 +58,7 @@ async def display_tasks(message: Message, state: FSMContext) -> None:
     for i, task in enumerate(tasks):
         if i in answered_tasks:
             continue
-        if len(cur_row) == 3:
+        if len(cur_row) == 4:
             buttons.append([])
             cur_row = buttons[-1]
         cur_row.append(InlineKeyboardButton(text=task, callback_data=f"{i}"))
