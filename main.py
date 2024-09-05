@@ -1,12 +1,13 @@
 import asyncio
 import logging
+import os
 import sys
 from os import getenv
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import (
     Message,
     InlineKeyboardButton,
@@ -28,6 +29,7 @@ TOKEN = str(env_token)
 
 dp = Dispatcher(storage=MemoryStorage())
 
+groups_that_started = []
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:
@@ -42,9 +44,14 @@ async def collect_name_and_start_game(message: Message, state: FSMContext) -> No
     if not message.text:
         await message.answer("Введите название группы!")
         return
+    
+    if message.text in groups_that_started:
+        await message.answer("Группа с таким именем уже начала игру.")
+        return
 
     await state.update_data(group=message.text)
     logging.info(f"Группа {message.text} начала игру.")
+    groups_that_started.append(message.text)
 
     await display_tasks(message, state)
 
@@ -58,7 +65,7 @@ async def display_tasks(message: Message, state: FSMContext) -> None:
     for i, task in enumerate(tasks):
         if i in answered_tasks:
             continue
-        if len(cur_row) == 4:
+        if len(cur_row) == 2:
             buttons.append([])
             cur_row = buttons[-1]
         cur_row.append(InlineKeyboardButton(text=task, callback_data=f"{i}"))
@@ -85,7 +92,7 @@ async def task_selection_handler(query: CallbackQuery, state: FSMContext) -> Non
     await state.update_data(cur_task=cur_task)
     await state.set_state(GameState.task_reply)
 
-    await query.message.answer("Введите ответ полученный у куратора!")  # type: ignore
+    await query.message.answer("Введите ответ полученный у куратора!")
 
 
 @dp.message(GameState.task_reply)
@@ -93,6 +100,7 @@ async def process_task_reply(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     answered_tasks = data.get("answered_tasks", {})
     cur_task = int(data["cur_task"])
+
     if cur_task in answered_tasks:
         await message.answer("(ОШИБКА) Вы уже ответили на это задание!")
         await display_tasks(message, state)
@@ -127,7 +135,25 @@ async def process_end_game(message: Message, state: FSMContext) -> None:
         + f"Полученные баллы за задания: {answered_tasks}"
     )
 
+    await state.clear()
+
     write_result(data["group"], answered_tasks)
+
+@dp.message(Command("end"))
+async def premature_end_command(message: Message, state: FSMContext):
+    data = await state.get_data()
+    answered_tasks = data.get("answered_tasks", {})
+
+    if data.get("group", None) is None:
+        await message.answer("Нельзя закончить игру")
+    
+    for i, task in enumerate(tasks):
+        if i in answered_tasks:
+            continue
+        answered_tasks[i] = 0
+    
+    await state.update_data(answered_tasks=answered_tasks)
+    await process_end_game(message, state)
 
 
 async def main() -> None:
@@ -136,5 +162,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    asyncio.run(main())
+    file = "bot.log"
+    with open(file, mode="w") as f:
+        print(f"Запуск бота. Файл с логами: {os.path.realpath(f.name)}")
+        logging.basicConfig(level=logging.INFO, stream=f)
+        asyncio.run(main())

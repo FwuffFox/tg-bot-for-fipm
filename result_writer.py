@@ -1,6 +1,6 @@
 import game  
 from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build, Resource
+from googleapiclient.discovery import build
 
 # Replace with your Google Sheet ID and sheet name
 SHEET_ID = "1-P-LfeMeIy2U9RBFOuQ1S8GLwVwuCzFU55oxzpo52Lg"
@@ -25,7 +25,7 @@ def create_table():
         print(f"НЕТ ТАБЛИЦЫ {SHEET_NAME}")
         raise
 
-    header = [["Имя"] + game.tasks + ["Сумма баллов"]]
+    header = [["Имя"] + game.tasks + ["Сумма баллов", "Время Начала", "Время Окончания"]]
     sheet.values().update(
         spreadsheetId=SHEET_ID,
         range=f"{SHEET_NAME}!A1",
@@ -33,7 +33,7 @@ def create_table():
         body={"values": header}
     ).execute()
 
-def write_result(name: str, answers: dict[int, int]):
+def write_result(name: str, answers: dict[int, int], time_begin: ):
     result = [name] + [answers.get(i, 0) for i in range(len(game.tasks))] + [sum(answers.values())]
     sheet.values().append(
         spreadsheetId=SHEET_ID,

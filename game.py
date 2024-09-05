@@ -9,33 +9,28 @@ tasks: list[str] = [
     "Шестой",
     "Седьмой",
     "Восьмой",
-    "Девятый",
-    "Десятый",
-    "Одиннадцатый",
-    "Двенадцатый",
-    "Тринадцатый",
-    "Четырнадцатый",
-    "Пятнадцатый",
-    "Шестнадцатый",
-    "Семнадцатый",
-    "Восемнадцатый",
-    "Девятнадцатый",
-    "Двадцатый",
 ]
 
 
 def get_points_from_answer(answer: str) -> int:
-    if answer[0] == "А":
-        return 5
-    if answer[-1] == "О":
-        return 4
-    if answer[0] == "О":
-        return 3
-    if answer[-1] == "А":
-        return 2
-    if answer[1] == "Б":
-        return 1
-    return 0
+    if len(answer) < 2:
+        return 0
+    key_letter = answer[1].toLowerCase()
+    match key_letter:
+        case "у":
+            return 0
+        case "и":
+            return 1
+        case "е":
+            return 2
+        case "а":
+            return 3
+        case "о":
+            return 4
+        case "п":
+            return 5
+        case _:
+            return 0
 
 
 class GameState(StatesGroup):
