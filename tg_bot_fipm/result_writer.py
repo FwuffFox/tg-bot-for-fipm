@@ -59,4 +59,5 @@ def append_rows(rows: list[Any]):
         insertDataOption="INSERT_ROWS",
     ).execute()
 
+
 create_table()

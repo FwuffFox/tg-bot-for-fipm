@@ -6,6 +6,7 @@ from os import getenv
 from dotenv import load_dotenv
 
 from aiogram import F, Bot, Dispatcher, html
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -16,7 +17,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     CallbackQuery,
-    FSInputFile
+    FSInputFile,
 )
 
 from game import (
@@ -39,7 +40,14 @@ if not env_token:
 
 TOKEN = str(env_token)
 
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+proxy = getenv("PROXY") 
+proxy = proxy if proxy != "" else None
+session = AiohttpSession(proxy=proxy)
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    session=session,
+)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
@@ -150,7 +158,7 @@ async def process_task_reply(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
 
     if player_data.cur_task in player_data.tasks:
-        await message.answer(f"{html.bold("ОШИБКА")} Вы уже ответили на это задание!")
+        await message.answer(f"{html.bold('ОШИБКА')} Вы уже ответили на это задание!")
         await display_tasks(message, state)
         return
 
@@ -211,5 +219,5 @@ if __name__ == "__main__":
         with open(file, mode="w") as f:
             print(f"Запуск бота. Файл с логами: {os.path.realpath(f.name)}")
             logging.basicConfig(level=logging.INFO, stream=f)
-    
+
     asyncio.run(main())
