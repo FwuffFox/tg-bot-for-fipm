@@ -13,14 +13,15 @@ class PlayerData:
     handle: str = ""
     name: str = ""
     cur_task: int = -1
-    tasks: dict[int, int] = {}
-    time_start: str = ""
-    time_end: str = ""
+    tasks: dict[int, int]
+    time_start: str
+    time_end: str
 
     def __init__(self, name: str, handle: str, id: int):
         self.id = id
         self.handle = handle
         self.name = name
+        self.tasks = dict[int, int]()
 
     def fixate_start_time(self) -> None:
         self.time_start = time.strftime("%H:%M:%S", time.gmtime(time.time() + 3 * 3600))

@@ -115,6 +115,7 @@ async def collect_name_and_start_game(message: Message, state: FSMContext) -> No
 async def display_tasks(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
 
+    print(player_data.tasks)
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=task, callback_data=f"{i}")]
