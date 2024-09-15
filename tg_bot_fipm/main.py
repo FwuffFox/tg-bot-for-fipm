@@ -1,6 +1,8 @@
 import asyncio
+import json
 import logging
 import os
+import signal
 import sys
 from os import getenv
 from dotenv import load_dotenv
@@ -40,13 +42,9 @@ if not env_token:
 
 TOKEN = str(env_token)
 
-proxy = getenv("PROXY") 
-proxy = proxy if proxy != "" else None
-session = AiohttpSession(proxy=proxy)
 bot = Bot(
     token=TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-    session=session,
 )
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
@@ -107,7 +105,6 @@ async def collect_name_and_start_game(message: Message, state: FSMContext) -> No
     current_players.add(id)
     groups_that_started.append(name)
     await state.update_data(player_data=player_data)
-    logging.info(f"Пользователь {player_data} начал игру.")
 
     await display_tasks(message, state)
 
@@ -115,7 +112,6 @@ async def collect_name_and_start_game(message: Message, state: FSMContext) -> No
 async def display_tasks(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
 
-    print(player_data.tasks)
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=task, callback_data=f"{i}")]
@@ -207,6 +203,7 @@ async def times_up():
 
 async def main() -> None:
     await dp.start_polling(bot)
+    signal.signal(signal.SIGINT, lambda sig, frame: print("Нельзя остановить бота сейчас."))
     print(f"Завершение игры. Подождите пока все результаты будут записаны!\n \
             Бот больше не будет отвечать на сообщения. Кол-во игроков к записи {len(current_players)}")
     await times_up()
