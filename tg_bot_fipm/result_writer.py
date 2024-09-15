@@ -1,9 +1,13 @@
 from datetime import datetime, timezone
 from os import getenv
 from typing import Any
+
+from dotenv import load_dotenv
 import game
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+
+load_dotenv(override=True)
 
 SHEET_ID = "1-P-LfeMeIy2U9RBFOuQ1S8GLwVwuCzFU55oxzpo52Lg"
 SHEET_NAME = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
@@ -55,6 +59,4 @@ def append_rows(rows: list[Any]):
         insertDataOption="INSERT_ROWS",
     ).execute()
 
-
-# Example usage:
 create_table()

@@ -16,6 +16,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     CallbackQuery,
+    FSInputFile
 )
 
 from game import (
@@ -51,7 +52,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
 
     await state.set_state(GameState.name_collection)
 
-    await message.answer(texts.GREETING)
+    await message.answer_photo(FSInputFile("img/start.png"), texts.GREETING)
     await message.answer("Введите группу которую вы представляете (Например ПИ-2401):")
 
 
@@ -106,25 +107,22 @@ async def collect_name_and_start_game(message: Message, state: FSMContext) -> No
 async def display_tasks(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
 
-    buttons: list[list[InlineKeyboardButton]] = [[]]
-    cur_row: list[InlineKeyboardButton] = buttons[0]
-    for i, task in enumerate(tasks):
-        if i in player_data.tasks:
-            continue
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=task, callback_data=f"{i}")]
+            for i, task in filter(
+                lambda x: x[0] not in player_data.tasks, enumerate(tasks)
+            )
+        ]
+    )
 
-        if len(cur_row) == 1:
-            buttons.append([])
-            cur_row = buttons[-1]
-
-        cur_row.append(InlineKeyboardButton(text=task, callback_data=f"{i}"))
-
-    if len(buttons[0]) == 0:
+    if len(keyboard.inline_keyboard) == 0:
         await process_end_game(message, state)
         return
 
     await message.answer(
         text="Выберите название уровня, на котором вы находитесь:",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        reply_markup=keyboard,
     )
     await state.set_state(GameState.task_selection)
 
@@ -143,7 +141,7 @@ async def task_selection_handler(query: CallbackQuery, state: FSMContext) -> Non
     await state.set_state(GameState.task_reply)
 
     await query.message.answer(  # type: ignore
-        f"Введите ответ на задание '{tasks[cur_task]}'\nЛибо нажмите \\back чтобы вернутся к выбору вопроса:"
+        f"Введите ответ на задание '{tasks[cur_task]}'\nЛибо нажмите /back чтобы вернутся к выбору вопроса:"
     )
 
 
@@ -177,7 +175,7 @@ async def process_end_game(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
     player_data.fixate_end_time()
 
-    await message.answer(texts.GAME_END)
+    await message.answer_photo(FSInputFile("img/end.png"), texts.GAME_END)
 
     current_players.remove(player_data.id)
     await state.clear()
@@ -213,4 +211,5 @@ if __name__ == "__main__":
         with open(file, mode="w") as f:
             print(f"Запуск бота. Файл с логами: {os.path.realpath(f.name)}")
             logging.basicConfig(level=logging.INFO, stream=f)
+    
     asyncio.run(main())
