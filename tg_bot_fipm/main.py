@@ -191,6 +191,9 @@ async def process_end_game(message: Message, state: FSMContext) -> None:
 async def times_up():
     from aiogram.fsm.storage.base import StorageKey
 
+    print(f"Завершение игры. Подождите пока все результаты будут записаны!\n \
+            Бот больше не будет отвечать на сообщения. Кол-во игроков к записи {len(current_players)}")
+
     current_players_cp = current_players.copy()
     for user_id in current_players_cp:
         message = await bot.send_message(user_id, "Время вышло!")
@@ -203,10 +206,6 @@ async def times_up():
 
 async def main() -> None:
     await dp.start_polling(bot)
-    signal.signal(signal.SIGINT, lambda sig, frame: print("Нельзя остановить бота сейчас."))
-    print(f"Завершение игры. Подождите пока все результаты будут записаны!\n \
-            Бот больше не будет отвечать на сообщения. Кол-во игроков к записи {len(current_players)}")
-    await times_up()
 
 
 if __name__ == "__main__":
@@ -217,5 +216,8 @@ if __name__ == "__main__":
         with open(file, mode="w") as f:
             print(f"Запуск бота. Файл с логами: {os.path.realpath(f.name)}")
             logging.basicConfig(level=logging.INFO, stream=f)
-
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Получен сигнал завершения. Пожалуйста ничего не трогайте")
+        asyncio.run(times_up())
