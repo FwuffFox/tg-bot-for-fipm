@@ -31,15 +31,14 @@ class PlayerData:
 
 
 tasks: list[str] = [
-    "АНТОН И МЫ",
-    "ИНИЦИАТИВА И ИНИЦИАТОР",
-    "ОБРАТИ ВНИМАНИЕ",
-    "ПОСТАНОВКИ",
-    "БРЕЙН ШТОРМ",
-    "НАВАЛИ ВОЛЮМЕ",
-    "ОБРАЗ ПРОШЛОГО И НАСТОЯЩЕГО",
-    "ПОДЕЛИСЬ)",
-    "ДОП ЗАДАНИЕ",
+    "Вход в Межпространство",
+    "Столкновение миров", 
+    "Танцевальный взрыв", 
+    "Цифровой облик", 
+    "Космический пиар", 
+    "Чт0 быLO d@льш3?", 
+    "Провода Галактики", 
+    "Ярость Капитана", 
 ]
 
 groups_that_started = []
@@ -47,21 +46,21 @@ current_players: set[int] = set()
 
 
 def get_points_from_answer(answer: str) -> int:
-    if len(answer) < 2:
+    if len(answer) < 4:
         return 0
-    key_letter = answer[1].lower()
+    key_letter = answer[3].lower()
     match key_letter:
-        case "у":
-            return 0
-        case "и":
-            return 1
-        case "е":
-            return 2
         case "а":
+            return 0
+        case "е":
+            return 1
+        case "и":
+            return 2
+        case "р":
             return 3
-        case "о":
+        case "у":
             return 4
-        case "п":
+        case "м":
             return 5
         case _:
             return 0
