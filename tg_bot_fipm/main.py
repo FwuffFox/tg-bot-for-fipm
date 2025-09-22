@@ -29,6 +29,7 @@ from game import (
     tasks,
     groups_that_started,
     current_players,
+    blagodarnosti
 )
 import result_writer
 import texts
@@ -171,7 +172,7 @@ async def process_task_reply(message: Message, state: FSMContext) -> None:
 
     await state.set_state(GameState.task_selection)
 
-    await message.answer("Ответ принят.")
+    await message.answer(blagodarnosti[player_data.cur_task])
 
     await display_tasks(message, state)
 
