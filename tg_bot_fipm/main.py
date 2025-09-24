@@ -59,7 +59,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
 
     await state.set_state(GameState.name_collection)
 
-    await message.answer_photo(FSInputFile("img/start.png"), texts.GREETING)
+    await message.answer_photo(FSInputFile("img/start.jpg"), texts.GREETING)
     await message.answer("Введите группу которую вы представляете (Например ПИ-2401):")
 
 
@@ -127,7 +127,7 @@ async def display_tasks(message: Message, state: FSMContext) -> None:
         return
 
     await message.answer(
-        text="Выберите название уровня, на котором вы находитесь:",
+        text="Выберите название станции, на которой вы находитесь:",
         reply_markup=keyboard,
     )
     await state.set_state(GameState.task_selection)
@@ -147,7 +147,7 @@ async def task_selection_handler(query: CallbackQuery, state: FSMContext) -> Non
     await state.set_state(GameState.task_reply)
 
     await query.message.answer(  # type: ignore
-        f"Введите ответ на задание '{tasks[cur_task]}'\nЛибо нажмите /back чтобы вернутся к выбору вопроса:"
+        "Введите ответ.\nЛибо нажмите /back чтобы вернутся к выбору вопроса:"
     )
 
 
@@ -162,7 +162,7 @@ async def process_task_reply(message: Message, state: FSMContext) -> None:
 
     if not message.text:
         await message.answer(
-            f"Введите ответ на задание '{tasks[player_data.cur_task]}':"
+            "Введите ответ."
         )
         return
 
