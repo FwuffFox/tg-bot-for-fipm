@@ -181,7 +181,7 @@ async def process_end_game(message: Message, state: FSMContext) -> None:
     player_data: PlayerData = (await state.get_data()).get("player_data", None)
     player_data.fixate_end_time()
 
-    await message.answer_photo(FSInputFile("img/end.png"), texts.GAME_END)
+    await message.answer(texts.GAME_END)
 
     current_players.remove(player_data.id)
     await state.clear()
